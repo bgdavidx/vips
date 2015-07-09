@@ -67,3 +67,38 @@ vips_jpegsave_custom(VipsImage *in, void **buf, size_t *len, int strip, int qual
 {
     return vips_jpegsave_buffer(in, buf, len, "strip", strip, "Q", quality, "optimize_coding", TRUE, "interlace", interlace, NULL);
 }
+
+int
+vips_rotate0(VipsImage *in, VipsImage **out, int angle)
+{
+	int rotate = VIPS_ANGLE_D0;
+
+	if (angle == 90) {
+		rotate = VIPS_ANGLE_D90;
+	} else if (angle == 180) {
+		rotate = VIPS_ANGLE_D180;
+	} else if (angle == 270) {
+		rotate = VIPS_ANGLE_D270;
+	}
+
+	return vips_rot(in, out, rotate, NULL);
+};
+
+int
+vips_exif_orientation0(VipsImage *image) {
+	int orientation = 0;
+	const char *exif;
+	if (
+		vips_image_get_typeof(image, "exif-ifd0-Orientation") != 0 &&
+		!vips_image_get_string(image, "exif-ifd0-Orientation", &exif)
+	) {
+		orientation = atoi(&exif[0]);
+	}
+	return orientation;
+};
+
+int
+vips_flip0(VipsImage *in, VipsImage **out, int direction)
+{
+	return vips_flip(in, out, direction, NULL);
+};

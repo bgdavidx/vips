@@ -18,6 +18,22 @@ import (
 
 const DEBUG = false
 
+type Angle int
+
+const (
+	D0   Angle = 0
+	D90  Angle = 90
+	D180 Angle = 180
+	D270 Angle = 270
+)
+
+type Direction int
+
+const (
+	HORIZONTAL Direction = C.VIPS_DIRECTION_HORIZONTAL
+	VERTICAL   Direction = C.VIPS_DIRECTION_VERTICAL
+)
+
 var (
 	MARKER_JPEG = []byte{0xff, 0xd8}
 	MARKER_PNG  = []byte{0x89, 0x50}
@@ -64,6 +80,10 @@ type Options struct {
 	Interpolator Interpolator
 	Gravity      Gravity
 	Quality      int
+	Rotate       Angle
+	Flip         bool
+	Flop         bool
+	NoAutoRotate bool
 }
 
 func init() {
@@ -307,6 +327,45 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		debug("canvased same as affined")
 	}
 
+	var direction Direction = -1
+
+	if o.NoAutoRotate == false {
+		rotation, flip := calculateRotationAndFlip(image, o.Rotate)
+		if flip {
+			o.Flip = flip
+		}
+		if rotation > D0 && o.Rotate == 0 {
+			o.Rotate = rotation
+		}
+	}
+
+	if o.Rotate > 0 {
+		//image, err = vipsRotate(image, getAngle(o.Rotate))
+
+		err := C.vips_rotate0(image, &tmpImage, C.int(o.Rotate))
+		C.g_object_unref(C.gpointer(image))
+		image = tmpImage
+		if err != 0 {
+			return nil, resizeError()
+		}
+	}
+
+	if o.Flip {
+		direction = HORIZONTAL
+	} else if o.Flop {
+		direction = VERTICAL
+	}
+
+	if direction != -1 {
+		//image, err = vipsFlip(image, direction)
+		err := C.vips_flip0(image, &tmpImage, C.int(direction))
+		C.g_object_unref(C.gpointer(image))
+		image = tmpImage
+		if err != 0 {
+			return nil, resizeError()
+		}
+	}
+
 	// Always convert to sRGB colour space
 	C.vips_colourspace_0(image, &tmpImage, C.VIPS_INTERPRETATION_sRGB)
 	C.g_object_unref(C.gpointer(image))
@@ -366,4 +425,42 @@ func debug(format string, args ...interface{}) {
 		return
 	}
 	fmt.Fprintf(os.Stderr, format+"\n", args...)
+}
+
+func calculateRotationAndFlip(image *C.struct__VipsImage, angle Angle) (Angle, bool) {
+	rotate := D0
+	flip := false
+
+	if angle > 0 {
+		return rotate, flip
+	}
+
+	switch int(C.vips_exif_orientation0(image)) {
+	case 6:
+		rotate = D90
+		break
+	case 3:
+		rotate = D180
+		break
+	case 8:
+		rotate = D270
+		break
+	case 2:
+		flip = true
+		break // flip 1
+	case 7:
+		flip = true
+		rotate = D90
+		break // flip 6
+	case 4:
+		flip = true
+		rotate = D180
+		break // flip 3
+	case 5:
+		flip = true
+		rotate = D270
+		break // flip 8
+	}
+
+	return rotate, flip
 }
