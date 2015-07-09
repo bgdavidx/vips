@@ -169,6 +169,22 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 	// prepare for factor
 	factor := 0.0
 
+	var direction Direction = -1
+
+	if o.NoAutoRotate == false {
+		rotation, flip := calculateRotationAndFlip(image, o.Rotate)
+		if flip {
+			o.Flip = flip
+		}
+		if rotation > D0 && o.Rotate == 0 {
+			o.Rotate = rotation
+		}
+
+		if rotation == D90 || rotation == D270 {
+				o.Width = int(math.Floor(float64(inHeight) / factor))
+		}
+	}
+
 	// image calculations
 	switch {
 	// Fixed width and height
@@ -327,21 +343,7 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		debug("canvased same as affined")
 	}
 
-	var direction Direction = -1
-
-	if o.NoAutoRotate == false {
-		rotation, flip := calculateRotationAndFlip(image, o.Rotate)
-		if flip {
-			o.Flip = flip
-		}
-		if rotation > D0 && o.Rotate == 0 {
-			o.Rotate = rotation
-		}
-	}
-
 	if o.Rotate > 0 {
-		//image, err = vipsRotate(image, getAngle(o.Rotate))
-
 		err := C.vips_rotate0(image, &tmpImage, C.int(o.Rotate))
 		C.g_object_unref(C.gpointer(image))
 		image = tmpImage
@@ -357,7 +359,6 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 	}
 
 	if direction != -1 {
-		//image, err = vipsFlip(image, direction)
 		err := C.vips_flip0(image, &tmpImage, C.int(direction))
 		C.g_object_unref(C.gpointer(image))
 		image = tmpImage
