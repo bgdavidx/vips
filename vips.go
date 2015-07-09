@@ -182,7 +182,7 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		}
 	}
 
-	if (o.Rotate == D90 || o.Rotate == D270) {
+	if (rotation == D90 || rotation == D270) {
 		swap := inWidth
 		inWidth = inHeight
 		inHeight = swap
@@ -302,7 +302,7 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 	debug("residual: %v", residual)
 	if residual != 0 {
 		debug("residual %.2f", residual)
-		
+
 		// Create interpolator - "bilinear" (default), "bicubic" or "nohalo"
 		is := C.CString(o.Interpolator.String())
 		interpolator := C.vips_interpolate_new(is)
