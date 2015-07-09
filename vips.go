@@ -179,11 +179,12 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		if rotation > D0 && o.Rotate == 0 {
 			o.Rotate = rotation
 		}
+	}
 
-		if rotation == D90 || rotation == D270 {
-				o.Height = o.Width
-				o.Width = 0
-		}
+	if (o.Rotate == D90 || o.Rotate == D270) {
+		swap := inWidth
+		inWidth = inHeight
+		inHeight = swap
 	}
 
 	// image calculations
@@ -200,11 +201,11 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 	// Fixed width, auto height
 	case o.Width > 0:
 		factor = float64(inWidth) / float64(o.Width)
-		o.Height = int(math.Floor(float64(inHeight) / factor) + 0.5)
+		o.Height = int(math.Floor(float64(inHeight) / factor))
 	// Fixed height, auto width
 	case o.Height > 0:
 		factor = float64(inHeight) / float64(o.Height)
-		o.Width = int(math.Floor(float64(inWidth) / factor) + 0.5)
+		o.Width = int(math.Floor(float64(inWidth) / factor))
 	// Identity transform
 	default:
 		factor = 1
