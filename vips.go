@@ -16,7 +16,7 @@ import (
 	"unsafe"
 )
 
-const DEBUG = false
+const DEBUG = true
 
 type Angle int
 
@@ -84,6 +84,7 @@ type Options struct {
 	Flip         bool
 	Flop         bool
 	NoAutoRotate bool
+	RotateBeforePreExtract bool
 }
 
 func init() {
