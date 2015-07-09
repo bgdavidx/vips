@@ -284,6 +284,8 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		shrunkWidth := int(image.Xsize)
 		shrunkHeight := int(image.Ysize)
 
+		debug("shrunkWidth, shrunkHeight = %v, %v", shrunkWidth, shrunkHeight)
+
 		residualx := float64(o.Width) / float64(shrunkWidth)
 		residualy := float64(o.Height) / float64(shrunkHeight)
 		if o.Crop {
