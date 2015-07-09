@@ -200,11 +200,11 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 	// Fixed width, auto height
 	case o.Width > 0:
 		factor = float64(inWidth) / float64(o.Width)
-		o.Height = int(math.Round(float64(inHeight) / factor))
+		o.Height = int(math.Floor(float64(inHeight) / factor) + 0.5)
 	// Fixed height, auto width
 	case o.Height > 0:
 		factor = float64(inHeight) / float64(o.Height)
-		o.Width = int(math.Round(float64(inWidth) / factor))
+		o.Width = int(math.Floor(float64(inWidth) / factor) + 0.5)
 	// Identity transform
 	default:
 		factor = 1
