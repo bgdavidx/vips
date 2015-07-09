@@ -16,7 +16,7 @@ import (
 	"unsafe"
 )
 
-const DEBUG = true
+const DEBUG = false
 
 type Angle int
 
