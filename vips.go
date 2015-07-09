@@ -270,6 +270,9 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		}
 	}
 
+	residualx := residual
+	residualy := residual
+
 	if shrink > 1 {
 		debug("shrink %d", shrink)
 		// Use vips_shrink with the integral reduction
@@ -286,11 +289,11 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 
 		debug("shrunkWidth, shrunkHeight = %v, %v", shrunkWidth, shrunkHeight)
 
-		residualx := float64(o.Width) / float64(shrunkWidth)
-		residualy := float64(o.Height) / float64(shrunkHeight)
+		residualx = float64(o.Width) / float64(shrunkWidth)
+		residualy = float64(o.Height) / float64(shrunkHeight)
 		if o.Crop {
-			residual = math.Max(residualx, residualy)
-		} else {
+		 	residual = math.Max(residualx, residualy)
+		 } else {
 			residual = math.Min(residualx, residualy)
 		}
 	}
@@ -299,12 +302,13 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 	debug("residual: %v", residual)
 	if residual != 0 {
 		debug("residual %.2f", residual)
+		
 		// Create interpolator - "bilinear" (default), "bicubic" or "nohalo"
 		is := C.CString(o.Interpolator.String())
 		interpolator := C.vips_interpolate_new(is)
 
 		// Perform affine transformation
-		err := C.vips_affine_interpolator(image, &tmpImage, C.double(residual), 0, 0, C.double(residual), interpolator)
+		err := C.vips_affine_interpolator(image, &tmpImage, C.double(residualx), 0, 0, C.double(residualy), interpolator)
 		C.g_object_unref(C.gpointer(image))
 
 		image = tmpImage
