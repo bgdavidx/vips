@@ -260,6 +260,7 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		factor = math.Max(factor, 1.0)
 		shrink = int(math.Floor(factor))
 		residual = float64(shrink) / factor
+		debug("factor, shrink, residual = %v %v %v", factor, shrink, residual)
 		// Reload input using shrink-on-load
 		err := C.vips_jpegload_buffer_shrink(unsafe.Pointer(&buf[0]), C.size_t(len(buf)), &tmpImage, C.int(shrinkOnLoad))
 		C.g_object_unref(C.gpointer(image))
