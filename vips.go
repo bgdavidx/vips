@@ -180,12 +180,12 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		if rotation > D0 && o.Rotate == 0 {
 			o.Rotate = rotation
 		}
-	}
 
-	if (rotation == D90 || rotation == D270) {
-		swap := inWidth
-		inWidth = inHeight
-		inHeight = swap
+		if (rotation == D90 || rotation == D270) {
+			swap := inWidth
+			inWidth = inHeight
+			inHeight = swap
+		}
 	}
 
 	// image calculations
