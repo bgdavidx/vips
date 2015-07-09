@@ -181,7 +181,8 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		}
 
 		if rotation == D90 || rotation == D270 {
-				o.Width = int(math.Floor(float64(inHeight) / factor))
+				o.Height = o.Width
+				o.Width = 0
 		}
 	}
 
