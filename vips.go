@@ -152,6 +152,10 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		C.vips_pngload_buffer_seq(unsafe.Pointer(&buf[0]), C.size_t(len(buf)), &image)
 	}
 
+	if image == nil {
+		return nil, errors.New("Unable to read image")
+	}
+
 	// cleanup
 	defer func() {
 		C.vips_thread_shutdown()
@@ -267,6 +271,10 @@ func Resize(buf []byte, o Options) ([]byte, error) {
 		image = tmpImage
 		if err != 0 {
 			return nil, resizeError()
+		}
+
+		if image == nil {
+			return nil, errors.New("Unable to resize image")
 		}
 	}
 
